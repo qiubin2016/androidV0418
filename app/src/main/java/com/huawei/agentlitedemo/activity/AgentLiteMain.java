@@ -47,8 +47,8 @@ public class AgentLiteMain extends BaseAty {
 
             FileUtil.copyAssetDirToFiles(context, "conf");
 
-            loadProperties(workPath + "/conf/" + configFile);
-            loadSharedData();
+            loadProperties(workPath + "/conf/" + configFile);  //读取配置文件
+            loadSharedData();  //读取数据库数据
 
             if (BaseService.init(workPath, logPath, context)) {
                 gotoNextPage();
@@ -56,6 +56,7 @@ public class AgentLiteMain extends BaseAty {
                 Toast.makeText(this, "BaseService init failed", Toast.LENGTH_LONG).show();
             }
         } catch (Throwable e) {
+            //Throwable有两个重要的子类：Exception（异常）和 Error（错误），二者都是 Java 异常处理的重要子类，各自都包含大量子类
             e.printStackTrace();
         }
     }
