@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.huawei.test.MainActivity" >
+    <item android:id="@+id/action_go_to_bind"
+          android:title="Bind"
+          android:orderInCategory="100"
+          app:showAsAction="always" />
+</menu>
