@@ -24,6 +24,7 @@ public class AgentLiteUtil {
 
     public synchronized static boolean loadProperty(InputStream inputStream)
     {
+        /*加载调测的配置文件*/
         Log.i(LOG_TAG, "start loadProperty");
         SharedPreferences.Editor editor = mPreferences.edit();
         try
