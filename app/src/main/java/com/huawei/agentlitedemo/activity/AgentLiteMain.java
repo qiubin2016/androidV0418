@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -50,44 +51,19 @@ public class AgentLiteMain extends BaseAty {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Main");
         }
-        try {
-            Context context = getApplicationContext();
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
-                }
-            }
-
-            //获取sdcard路径
-            File sdcardPath = Environment.getExternalStorageDirectory();
-            Log.i(TAG, "sdcardPath = " + sdcardPath.toString());
-            //sdcardPath = /storage/emulated/0
-
-            String workPath = FileUtil.getWorkDir(context).getAbsolutePath() + "/AgentLiteDemo";
-            //默认workPath无权限进入，修改路径
-            workPath = "/sdcard" + "/AgentLiteDemo";
-            String logPath = workPath + "/log";
-            File dir = new File(logPath);
-            dir.mkdirs();
-
-            Log.i(TAG, "workPath = " + workPath);
-            Log.i(TAG, "logPath = " + logPath);
-
-            FileUtil.copyAssetDirToFiles(context, "conf");
-
-            //  /sdcard/AgentLiteDemo/conf/config.properties
-            loadProperties(workPath + "/conf/" + configFile);  //读取配置文件
-            loadSharedData();  //读取数据库数据
-
-            if (BaseService.init(workPath, logPath, context)) {
-                gotoNextPage();
+        //动态申请存储权限
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                //无权限，则动态申请
+                ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
             } else {
-                Toast.makeText(this, "BaseService init failed", Toast.LENGTH_LONG).show();
+                //有权限，则执行初始化
+                init();    //华为iot业务初始化操作
             }
-        } catch (Throwable e) {
-            //Throwable有两个重要的子类：Exception（异常）和 Error（错误），二者都是 Java 异常处理的重要子类，各自都包含大量子类
-            e.printStackTrace();
+        } else {
+            //
+            init();    //华为iot业务初始化操作
         }
     }
 
@@ -214,6 +190,43 @@ public class AgentLiteMain extends BaseAty {
             for (int i = 0; i < permissions.length; i++) {
                 Log.i("MainActivity", "申请的权限为：" + permissions[i] + ",申请结果：" + grantResults[i]);
             }
+            init();    //华为iot业务初始化操作
+        }
+    }
+
+    private void init(){
+        try {
+            Context context = getApplicationContext();
+
+            //获取sdcard路径
+            File sdcardPath = Environment.getExternalStorageDirectory();
+            Log.i(TAG, "sdcardPath = " + sdcardPath.toString());
+            //sdcardPath = /storage/emulated/0
+
+            String workPath = FileUtil.getWorkDir(context).getAbsolutePath() + "/AgentLiteDemo";
+            //默认workPath无权限进入，修改路径
+            workPath = "/sdcard" + "/AgentLiteDemo";
+            String logPath = workPath + "/log";
+            File dir = new File(logPath);
+            dir.mkdirs();
+
+            Log.i(TAG, "workPath = " + workPath);
+            Log.i(TAG, "logPath = " + logPath);
+
+            FileUtil.copyAssetDirToFiles(context, "conf");
+
+            //  /sdcard/AgentLiteDemo/conf/config.properties
+            loadProperties(workPath + "/conf/" + configFile);  //读取配置文件
+            loadSharedData();  //读取数据库数据
+
+            if (BaseService.init(workPath, logPath, context)) {
+                gotoNextPage();
+            } else {
+                Toast.makeText(this, "BaseService init failed", Toast.LENGTH_LONG).show();
+            }
+        } catch (Throwable e) {
+            //Throwable有两个重要的子类：Exception（异常）和 Error（错误），二者都是 Java 异常处理的重要子类，各自都包含大量子类
+            e.printStackTrace();
         }
     }
 }
